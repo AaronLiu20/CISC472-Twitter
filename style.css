@@ -1,0 +1,41 @@
+:root{ 
+    --background: white;
+    --border: grey;
+}
+
+.Custom-row{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    word-wrap: break-word;
+    text-align: center;
+    background-color: var(--background);
+    background-clip: border-box;
+    border: 1px solid var(--border);
+    border-radius: 0.25rem;
+}
+
+.Custom-column{
+    flex-basis: 0;
+    flex-grow: 1;
+    max-width: 100%;
+    border: 1px solid var(--border);
+}
+
+.tweetcard{
+    margin-left: 2%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    word-wrap: break-word;
+    background-color: var(--background);
+    background-clip: border-box;
+    border: 1px solid var(--border);
+    border-radius: 0.25rem;
+}
+
+.tweetcard:hover{
+    background-color: salmon;
+}
