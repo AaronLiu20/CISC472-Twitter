@@ -9,22 +9,25 @@
       <div class="Custom-row">
         <div class="row g-0">
           <div class="Custom-column" id = "insertTweets">
-            <h1>Your tweets</h1>
+            <h1 label >Your tweets</h1>
+            <div id = "insertTweets">
+            </div>
           </div>
           <div class="Custom-column" id = "Form">
             <h1>Form</h1>
-            <from>
-              <label>Title:</label><br>
-              <input type= "text" id = "NewTitle" placeholder = "Title"></input><br>
-              <label>Author:</label><br>
-              <input type = "text" id = "UserHandle" placeholder = "Author.handle"></input><br>
-              <label>Picture</label><br>
-              <input type = " text" id = "Author.picture" placeholder = "Author.picture" value = "https://www.svg.com/img/gallery/the-scariest-games-markiplier-has-ever-played/intro-1659295045.jpg"></input><br>
-              <label>Content:</label><br>
-              <textarea type = "text" id = "Content" placeholder = "Content" rows = "4" cols = "50%"></textarea><br>
-              <label> Tweet: </label>
-              <input type = "submit" id = "FormSubmit"></input>
-            </from>
+            <button class = "Add" id = "Writing-Tweets"> Creating A Tweet</button>
+            <div id = "insert-form">
+              <form id = "tweetForm">
+                <label>Author:</label><br>
+                <input type = "text" id = "UserHandle" placeholder = "Author.handle"></input><br>
+                <label>Picture</label><br>
+                <input type = " text" id = "Author.picture" placeholder = "Author.picture" value = "https://www.svg.com/img/gallery/the-scariest-games-markiplier-has-ever-played/intro-1659295045.jpg"></input><br>
+                <label>Content:</label><br>
+                <textarea type = "text" id = "Content" placeholder = "Content" rows = "4" cols = "50%"></textarea><br>
+                <label> Tweet: </label>
+                <button id = "FormSubmit">Submit</button>
+              </form>
+            </div>
           </div>
           <div class="Custom-column">
             <h1>tweets</h1>

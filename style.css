@@ -1,6 +1,10 @@
 :root{ 
     --background: white;
     --border: grey;
+    --muted: #6c757d;
+    --focus: #3B1E1B;
+    --subElement: #BA6056;
+    --text: black;
 }
 
 .Custom-row{
@@ -39,3 +43,39 @@
 .tweetcard:hover{
     background-color: salmon;
 }
+
+.Likes:hover{
+    color: var(--focus);
+    border-color: var(--focus);
+}
+
+.Delete:hover{
+    color: var(--focus);
+    border: var(--focus);
+}
+
+/* template */
+.btn-group button {
+    background-color: white;
+    border: 1px solid var(--border) ;/* Green border */
+    color: var(--muted); /* White text */
+    padding: 10px 10px; /* Some padding */
+    cursor: pointer; /* Pointer/hand icon */
+    float: left; /* Float the buttons side by side */
+  }
+  
+  .btn-group button:not(:last-child) {
+    border-right: none; /* Prevent double borders */
+  }
+  
+  /* Clear floats (clearfix hack) */
+  .btn-group:after {
+    content: "";
+    clear: both;
+    display: table;
+  }
+  
+  /* Add a background color on hover */
+  .btn-group button:hover {
+    background-color: var(--subElement);
+  }
