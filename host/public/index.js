@@ -1,8 +1,4 @@
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.9.4/firebase-app.js";
-  import * as rtdb from "https://www.gstatic.com/firebasejs/9.9.4/firebase-database.js";
-
-  //Firebase configuration
+//Firebase configuration
   const firebaseConfig = {
     apiKey: "AIzaSyD3lTbWlC8B8IIlQeYjxdIZE5ha8sI_BDI",
     authDomain: "cisc472-website-security.firebaseapp.com",
@@ -13,21 +9,36 @@
   };
 
   //Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const db = rtdb.getDatabase(app);
-  const TweetDBR = rtdb.ref(db, "/Tweets");
-  const ArchieveDBR  = rtdb.ref(db, "/Archieved");
-  const UserDBR = rtdb.ref(db, "/Users");
+firebase.initializeApp(firebaseConfig);
+  const TweetDBR = firebase.database().ref("/Tweets");
+  const ArchieveDBR  = firebase.database().ref("/Archieved");
+  const UserDBR = firebase.database().ref("/Users");
 
   //this is a helper function that does wraps the object into a new object and saves it into the database 
   let UpdateData = (originalTweet, id) => {
-    let tempTweet = {};
-    tempTweet[id] = originalTweet;
-    rtdb.update(TweetDBR, tempTweet);
+    firebase.database().ref(TweetDBR).child(id).update(originalTweet);
+  }
+
+  //this is the helper function that appends the form to edit/create a new tweet and attaches the sumbit function to the submit button
+  let insertForm = (id, creating) => {
+    document.getElementById("insert-form").innerHTML = "";
+    document.getElementById("insert-form").insertAdjacentHTML("beforeend", (`
+    <form id = "tweetForm">
+      <label>Author:</label><br>
+      <input type = "text" id = "UserHandle" placeholder = "Author.handle"></input><br>
+      <label>Picture</label><br>
+      <input type = " text" id = "Author.picture" placeholder = "Author.picture" value = "https://www.svg.com/img/gallery/the-scariest-games-markiplier-has-ever-played/intro-1659295045.jpg"></input><br>
+      <label>Content:</label><br>
+      <textarea type = "text" id = "Content" placeholder = "Content" rows = "4" cols = "50%"></textarea><br>
+      <label> Tweet: </label>
+      <button id = "FormSubmit">Submit</button>
+    </form>`));
+    document.getElementById("FormSubmit").onclick = function(){SubmitTweets(id, creating);};
   }
 
 //this this appends the tweet on the left side and creates the html with the proper information
 let renderTweets = (tweetObject, TweetID, placement)=>{
+  let hours =  (new Date() - new Date(tweetObject.timestamp))/3600000;
   document.getElementById(placement).insertAdjacentHTML("beforeend",(`
       <div id = "insertTweets"> </div>
       <!-- start of the tweetcard -->
@@ -65,22 +76,25 @@ let LikeListener = (originalTweet, id)=>{
 //toggles the deleted field to true or false and removes it from the page if it is deleted
 let Deletelistener = (originalTweet, id) =>{
   document.getElementById(`delete-${id}`).addEventListener("click", function(event){
-    let idividualTweet = rtdb.ref(db, `Tweets/${id}`);
+    let idividualTweet = firebase.database().ref(`Tweets/${id}`);
     let reference = document.getElementById(id);
     reference.removeEventListener("click", LikeListener);
     reference.removeEventListener("click", Deletelistener);
     reference.removeEventListener("click", EditListener);
-    rtdb.push(ArchieveDBR, originalTweet);
-    rtdb.remove(idividualTweet);
+    firebase.database().ref(ArchieveDBR).push(originalTweet);
+    firebase.database().ref(TweetDBR).child(id).remove();
+    reference.remove();
   });
 }
 
-function SubmitTweets(id){
+function SubmitTweets(id, CreatingNew){
   let tempHandle = document.getElementById("UserHandle").value;
   let tempAuthorPicture = document.getElementById("Author.picture").value;
   let tempContent = document.getElementById("Content").value;
   let newKey = id;
-  if(id == 0){ newKey = rtdb.push(TweetDBR,'posts').key;}
+  if(CreatingNew){
+    newKey = firebase.database().ref(TweetDBR).push('posts').key;
+  }
   let TweetTimeStamp = new Date().getTime();
 
   //this creates a new json object with all of the information for the new tweets
@@ -98,15 +112,15 @@ function SubmitTweets(id){
 
 let EditListener = (originalTweet, id) =>{
   document.getElementById(`Edits-${id}`).addEventListener("click", function(event){
+    insertForm(id, false);
     document.getElementById("UserHandle").value = originalTweet.Author.handle;
     document.getElementById("Author.picture").value = originalTweet.Author.picture;
     document.getElementById("Content").value = originalTweet.content;
-    document.getElementById("FormSubmit").onclick = function(){SubmitTweets(id);};
   });
 }
 
 //reads the databse for tweets and fires the renderTweet with the data it gets*/
-rtdb.onChildAdded(TweetDBR, (ss) =>{
+TweetDBR.on( "child_added" , (ss) =>{
   let tempTweet = ss.val();
   renderTweets(tempTweet, ss.key, "insertTweets");
   LikeListener(tempTweet, ss.key);
@@ -114,22 +128,16 @@ rtdb.onChildAdded(TweetDBR, (ss) =>{
   EditListener(tempTweet, ss.key);
 });
 
-document.getElementById("Writing-Tweets").addEventListener("click", function(event){
-  document.getElementById("insert-form").innerHTML = "";
-  document.getElementById("insert-form").insertAdjacentHTML("beforeend", (`
-  <form id = "tweetForm">
-    <label>Author:</label><br>
-    <input type = "text" id = "UserHandle" placeholder = "Author.handle"></input><br>
-    <label>Picture</label><br>
-    <input type = " text" id = "Author.picture" placeholder = "Author.picture" value = "https://www.svg.com/img/gallery/the-scariest-games-markiplier-has-ever-played/intro-1659295045.jpg"></input><br>
-    <label>Content:</label><br>
-    <textarea type = "text" id = "Content" placeholder = "Content" rows = "4" cols = "50%"></textarea><br>
-    <label> Tweet: </label>
-    <button id = "FormSubmit">Submit</button>
-  </form>`));
-});
-
-//this gets the data from the form and adds the tweet into the Tweets JSON 
-document.getElementById("FormSubmit").addEventListener("click", function(event){
-  SubmitTweets(0);
+firebase.auth().onAuthStateChanged(user=>{
+  if(!user){
+  document.getElementById("Writing-Tweets").addEventListener("click", function(event){
+    var provider = new firebase.auth.GoogleAuthProvider();
+    firebase.auth().signInWithPopup(provider);
+  });
+  }
+  else{
+    document.getElementById("Writing-Tweets").addEventListener("click", function(event){
+      insertForm(0, true);
+    });
+  }
 });

@@ -3,7 +3,10 @@
     <head>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
         <link rel = "stylesheet" href = "style.css">
-        <script type = "module" src = "src/index.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/9.9.4/firebase-app-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/9.9.4/firebase-database-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/9.9.4/firebase-auth-compat.js"></script>
+        <script type = "module" src = "index.js"></script>
     </head>
     <body>
       <div class="Custom-row">
@@ -17,16 +20,6 @@
             <h1>Form</h1>
             <button class = "Add" id = "Writing-Tweets"> Creating A Tweet</button>
             <div id = "insert-form">
-              <form id = "tweetForm">
-                <label>Author:</label><br>
-                <input type = "text" id = "UserHandle" placeholder = "Author.handle"></input><br>
-                <label>Picture</label><br>
-                <input type = " text" id = "Author.picture" placeholder = "Author.picture" value = "https://www.svg.com/img/gallery/the-scariest-games-markiplier-has-ever-played/intro-1659295045.jpg"></input><br>
-                <label>Content:</label><br>
-                <textarea type = "text" id = "Content" placeholder = "Content" rows = "4" cols = "50%"></textarea><br>
-                <label> Tweet: </label>
-                <button id = "FormSubmit">Submit</button>
-              </form>
             </div>
           </div>
           <div class="Custom-column">
