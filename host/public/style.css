@@ -44,14 +44,9 @@
     background-color: salmon;
 }
 
-.Likes:hover{
+.Button:hover{
     color: var(--focus);
     border-color: var(--focus);
-}
-
-.Delete:hover{
-    color: var(--focus);
-    border: var(--focus);
 }
 
 /* template */
