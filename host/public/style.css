@@ -5,6 +5,7 @@
     --focus: #3B1E1B;
     --subElement: #BA6056;
     --text: black;
+    --border-size: 1px;
 }
 
 .Custom-row{
@@ -16,7 +17,7 @@
     text-align: center;
     background-color: var(--background);
     background-clip: border-box;
-    border: 1px solid var(--border);
+    border: var(--border-size) solid var(--border);
     border-radius: 0.25rem;
 }
 
@@ -24,11 +25,10 @@
     flex-basis: 0;
     flex-grow: 1;
     max-width: 100%;
-    border: 1px solid var(--border);
+    border: var(--border-size) solid var(--border);
 }
 
 .tweetcard{
-    margin-left: 2%;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -36,7 +36,7 @@
     word-wrap: break-word;
     background-color: var(--background);
     background-clip: border-box;
-    border: 1px solid var(--border);
+    border: var(--border-size) solid var(--border);
     border-radius: 0.25rem;
 }
 
@@ -52,7 +52,7 @@
 /* template */
 .btn-group button {
     background-color: white;
-    border: 1px solid var(--border) ;/* Green border */
+    border: var(--border-size) solid var(--border) ;/* Green border */
     color: var(--muted); /* White text */
     padding: 10px 10px; /* Some padding */
     cursor: pointer; /* Pointer/hand icon */
