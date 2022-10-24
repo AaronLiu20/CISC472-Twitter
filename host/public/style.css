@@ -24,8 +24,11 @@
 .Custom-column{
     flex-basis: 0;
     flex-grow: 1;
-    max-width: 100%;
+    max-width: 100vw;
     border: var(--border-size) solid var(--border);
+    overflow-y: scroll; 
+    max-height: 100vh;
+    overflow-x: hidden;
 }
 
 .tweetcard{

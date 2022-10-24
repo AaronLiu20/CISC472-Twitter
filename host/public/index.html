@@ -8,7 +8,7 @@
         <script src="https://www.gstatic.com/firebasejs/9.9.4/firebase-auth-compat.js"></script>
         <script type = "module" src = "index.js"></script>
     </head>
-    <body>
+    <body style = "overflow-x: hidden; overflow-y: hidden;">
       <div class="Custom-row">
         <div class="row g-0">
           <div class="Custom-column">
@@ -18,8 +18,10 @@
           </div>
           <div class="Custom-column" id = "Form">
             <h1>Form</h1>
-            <button class = "Button" id = "login"> Sign in</button>           
-            <button class = "Button" id = "Writing-Tweets"> Creating A Tweet</button>
+            <div class = "btn-group" id = "Form-buttons">
+              <button class = "Button" id = "login"> Sign in</button>           
+              <button class = "Button" id = "Writing-Tweets"> Creating A Tweet</button>
+            </div>
             <div id = "insert-form">
             </div>
           </div>

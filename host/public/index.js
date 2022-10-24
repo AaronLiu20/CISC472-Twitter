@@ -13,33 +13,70 @@ firebase.initializeApp(firebaseConfig);
 const TweetDBR = firebase.database().ref("/Tweets");
 const ArchieveDBR  = firebase.database().ref("/Archieved");
 const UserDBR = firebase.database().ref("/Users");
+const UsernameDBR = firebase.database().ref("/Usernames");
 let provider = new firebase.auth.GoogleAuthProvider();
+const TweetLength = 280;
 
   //this is a helper function that does wraps the object into a new object and saves it into the database 
 let UpdateData = (placement, id, content) => {
   firebase.database().ref(placement).child(id).update(content).catch((error) => {alert(error);});;
 }
 
+function clearTweets(){
+  document.getElementById("insertTweets").innerHTML = ``;
+  document.getElementById("YourTweets").innerHTML = ``;
+  document.getElementById("insert-form").innerHTML = ``;
+}
+
+function updateUserProfile(userUID){
+  document.getElementById("insert-form").innerHTML = "";
+  document.getElementById("insert-form").insertAdjacentHTML("beforeend", (`
+    <form id = "loginForm">
+      <label>Author:</label><br>
+      <input type = "text" id = "newHandle" placeholder = "Author.handle" required></input><br>
+      <label>Picture</label><br>
+      <input type = " text" id = "newPicture" placeholder = "Author.picture" value = "https://www.svg.com/img/gallery/the-scariest-games-markiplier-has-ever-played/intro-1659295045.jpg" required ></input><br>
+      <label> Account: </label>
+      <input type = "submit"></input>
+    </form>`));
+  document.getElementById("loginForm").onsubmit = (e) => {
+    e.preventDefault();
+    let newTempHandle = document.getElementById("newHandle").value;
+    let newTempProfile = document.getElementById("newPicture").value;
+    firebase.database().ref(UserDBR).once("value").then( function(ss){
+      if(ss.child(userUID).exists()){
+        let newUser = {
+          username: newTempHandle,
+          picture: newTempProfile
+        }
+        UpdateData(UserDBR, userUID, newUser);
+        document.getElementById("insert-form").innerHTML = ``;
+      }
+    })
+
+  }
+}
+
 //this gets the form data and formats into a tweet that will be saved within the database
-function SubmitHelper(id, CreatingNew, userUID, tempContent){
+function SubmitHelper(id, CreatingNew, userUID, tempContent, tweetLikes){
   let newKey = id;
+  let TweetTimeStamp = new Date().getTime();
   if(CreatingNew){
     newKey = firebase.database().ref(TweetDBR).push('posts').key;
-    let temp = {content: tempContent}
+    let temp = {date: TweetTimeStamp}
     firebase.database().ref(UserDBR).child(userUID).child("TweetID").child(newKey).update(temp);
   }
-  let TweetTimeStamp = new Date().getTime();
   let newTweet = {
     uid: userUID,
     content: tempContent,
-    like: 0,
-    timestamp: TweetTimeStamp,
+    like: tweetLikes,
+    timestamp: TweetTimeStamp
   };
   UpdateData(TweetDBR, newKey, newTweet);
 }
 
   //this is the helper function that appends the form to edit/create a new tweet and attaches the sumbit function to the submit button
-  let insertForm = (id, creating, userUID) => {
+  let insertForm = (id, creating, userUID, tweetLikes) => {
     document.getElementById("insert-form").innerHTML = "";
     document.getElementById("insert-form").insertAdjacentHTML("beforeend", (`
     <form id = "Creating-Tweet">
@@ -48,7 +85,8 @@ function SubmitHelper(id, CreatingNew, userUID, tempContent){
       <label> Tweet: </label>
       <input type = "submit"></input>
     </form>`));
-    document.getElementById("Creating-Tweet").onsubmit = function(){SubmitTweets(id, creating, userUID);};
+    document.getElementById("Content").maxLength = TweetLength;
+    document.getElementById("Creating-Tweet").onsubmit = function(){SubmitTweets(id, creating, userUID, tweetLikes);};
   }
 
 //this this appends the tweet on the left side and creates the html with the proper information
@@ -113,15 +151,15 @@ let Deletelistener = (originalTweet, id, userUID) =>{
   });
 }
 
-function SubmitTweets(id, creatingNew, userUID){
+function SubmitTweets(id, creatingNew, userUID, tweetLikes){
   let tempContent = document.getElementById("Content").value;
-  SubmitHelper(id, creatingNew, userUID, tempContent);
+  SubmitHelper(id, creatingNew, userUID, tempContent, tweetLikes);
 }
 
 let retweetListener = (tempTweet, tweetID, userUID) => {
   document.getElementById(`Retweet-${tweetID}`).addEventListener("click" , function(event){
     let tempContent = tempTweet.content;
-    SubmitHelper(0, true, userUID, tempContent);
+    SubmitHelper(0, true, userUID, tempContent, 0);
   });
 }
 
@@ -129,40 +167,23 @@ let retweetListener = (tempTweet, tweetID, userUID) => {
 let EditListener = (originalTweet, id, userUID ) =>{
   document.getElementById(`Edits-${id}`).onclick = function(event){
     event.preventDefault();
-    insertForm(id, false, userUID);
+    insertForm(id, false, userUID, originalTweet.like);
     document.getElementById("Content").value = originalTweet.content;
   };
 }
 
 let twitterLogin = () => {
-  document.getElementById("insert-form").innerHTML = "";
-  document.getElementById("insert-form").insertAdjacentHTML("beforeend", (`
-    <form id = "loginForm">
-      <label>Author:</label><br>
-      <input type = "text" id = "newHandle" placeholder = "Author.handle" required></input><br>
-      <label>Picture</label><br>
-      <input type = " text" id = "newPicture" placeholder = "Author.picture" value = "https://www.svg.com/img/gallery/the-scariest-games-markiplier-has-ever-played/intro-1659295045.jpg" required ></input><br>
-      <label> Account: </label>
-      <input type = "submit"></input>
-    </form>`));
-  document.getElementById("loginForm").onsubmit = (e) => {
-    e.preventDefault();
-    firebase.auth().signInWithPopup(provider).then((result) => {
-      firebase.database().ref( UserDBR).once("value").then( (ss) => {
-        if(!ss.child(result.user.uid).exists()){
-          let newHandle = document.getElementById("newHandle").value;
-          let newPicture = document.getElementById("newPicture").value;
-          let newUser = {
-            username: newHandle,
-            picture: newPicture,
-            email: result.user.email
-          };         
-          UpdateData(UserDBR, result.user.uid, newUser);
+  firebase.auth().signInWithPopup(provider).then((result) => {
+    firebase.database().ref(UserDBR).once("value").then( function(ss){
+      if(!ss.child(result.user.uid).exists()){
+        let newUser = {
+          username: result.user.displayName,
+          picture: "https://www.svg.com/img/gallery/the-scariest-games-markiplier-has-ever-played/intro-1659295045.jpg",
         }
-      });
-
-    }).catch((error) => {alert(error);});
-  };
+        UpdateData(UserDBR, result.user.uid, newUser);
+      }
+    })
+  }).catch((error) => {alert(error);});
 }
 
 //this is the start of the whole program since almost everything is now attached to a uid
@@ -172,18 +193,19 @@ firebase.auth().onAuthStateChanged(user=>{
     //this reads and shows all of the teeks that are current stored
     TweetDBR.on("child_added" , (ss) =>{
       let tempTweet = ss.val();
+      let tempTweetID = ss.key;
       firebase.database().ref(UserDBR).child(tempTweet.uid).get().then( (TweetUserObj) =>{
         let sameUser = (tempTweet.uid === user.uid);
         if(sameUser){
-          renderTweets(tempTweet, ss.key, TweetUserObj.val(), "YourTweets", sameUser);
-          Deletelistener(tempTweet, ss.key, user.uid);
-          EditListener(tempTweet, ss.key, user.uid);
+          renderTweets(tempTweet, tempTweetID, TweetUserObj.val(), "YourTweets", sameUser);
+          Deletelistener(tempTweet, tempTweetID, user.uid);
+          EditListener(tempTweet, tempTweetID, user.uid);
         }
         else{
-          renderTweets(tempTweet, ss.key, TweetUserObj.val(), "insertTweets", sameUser);
-          retweetListener(tempTweet, ss.key, user.uid);
+          renderTweets(tempTweet, tempTweetID, TweetUserObj.val(), "insertTweets", sameUser);
+          retweetListener(tempTweet, tempTweetID, user.uid);
         }
-        LikeListener(tempTweet, ss.key, user.uid);
+        LikeListener(tempTweet, tempTweetID, user.uid);
       });
     });
 
@@ -191,18 +213,23 @@ firebase.auth().onAuthStateChanged(user=>{
     document.getElementById("Writing-Tweets").innerHTML = "Create Tweet";
     document.getElementById("Writing-Tweets").onclick = function(event){
       event.preventDefault();
-      insertForm(0, true, user.uid);
+      insertForm(0, true, user.uid, 0);
     }
 
     loginReference.innerHTML = "Sign Out";
     loginReference.onclick = function(){
-      document.getElementById("insertTweets").innerHTML = ``;
-      document.getElementById("YourTweets").innerHTML = ``;
-      document.getElementById("insert-form").innerHTML = ``;
+      clearTweets();
+      document.getElementById("Update-profile").remove();
       firebase.auth().signOut();
     };
+
+    document.getElementById("Form-buttons").insertAdjacentHTML("beforeend", (`<button class = "Button" id = "Update-profile">Update Profile</button>`))
+    document.getElementById("Update-profile").onclick = function(){
+      updateUserProfile(user.uid);
+    }
   }
   else{
+    clearTweets();
     document.getElementById("Writing-Tweets").innerHTML = "Log in";
     //this prevents the create tweet button from adding the form and alert the user to login
     document.getElementById("Writing-Tweets").onclick = function(event){
@@ -211,15 +238,16 @@ firebase.auth().onAuthStateChanged(user=>{
         firebase.database().ref(UserDBR).once("value").then( (ss) => {
           if(!ss.child(result.user.uid).exists()){
               alert("This account does not exist");
+              document.getElementById("Update-profile").remove();
               firebase.auth().signOut();
             }
            });
       
         }).catch((error) => {alert(error);});
     }
-    loginReference.innerHTML = "Sign in";
+    loginReference.innerHTML = "Sign Up";
     loginReference.onclick = function(event){
       twitterLogin();
     };
-  }
+  }  
 });
